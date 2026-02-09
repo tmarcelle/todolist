@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+		<script type="text/javascript" src="//unpkg.com/alpinejs" defer></script>
+		<title>ToDo List</title>
+	</head>
+	<body style="font-family: 'Inter', sans-serif; background-color: #f0fdf4; color: #1b4332; min-height: 100vh; margin: 0; padding: 20px;">
+		<div x-data="todoApp()" style="max-width: 600px; margin: 40px auto; background: #ffffff; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); padding: 32px; border: 1px solid #c7f9cc;">
+			<div style="text-align: center; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 2px solid #c7f9cc;">
+				<h2 style="font-size: 28px; font-weight: 700; color: #1b4332; margin: 0;"> To Do List </h2>
+			</div>
+
+			<div style="display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap;">
+				<button @click="showForm()" style="flex: 1; min-width: 140px; padding: 12px 20px; background-color: #c7f9cc; color: #1b4332; border: 2px solid #80ed99; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; transition: background-color 0.2s;">Add Item to List</button>
+				<button @click="clearList()" style="flex: 1; min-width: 140px; padding: 12px 20px; background-color: #fee2e2; color: #991b1b; border: 2px solid #fca5a5; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; transition: background-color 0.2s;">Delete All Items from List</button>
+			</div>
+			<!-- Add item to todo list -->
+			<div x-show="addItem" style="background: #f0fdf4; border-radius: 12px; padding: 24px; margin-bottom: 24px; border: 1px solid #c7f9cc;">
+				<label style="display: block; font-size: 13px; font-weight: 600; color: #2d6a4f; margin-bottom: 6px;">Task Description</label>
+				<input type="text" x-model="listData.desc" placeholder="Add milk to grocery list" style="width: 100%; padding: 12px 16px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; font-family: inherit; margin-bottom: 16px; box-sizing: border-box; outline: none;">
+				<label style="display: block; font-size: 13px; font-weight: 600; color: #2d6a4f; margin-bottom: 6px;">Due Date</label>
+				<input type="date" x-model="listData.duedate" placeholder="2/12/2029" style="width: 100%; padding: 12px 16px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; font-family: inherit; margin-bottom: 20px; box-sizing: border-box; outline: none;">
+				<div style="display: flex; gap: 12px;">
+					<button @click="addItemToList()" style="flex: 1; padding: 12px; background-color: #57cc99; color: #ffffff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit;">Submit</button>
+					<button @click="cancel()" style="flex: 1; padding: 12px; background-color: #e5e7eb; color: #374151; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit;">Cancel</button>
+				</div>
+			</div>
+
+			<!-- view to do list items -->
+			<div x-show="!addItem">
+				<template x-for="things in listOfThings" :key="things.id">
+					<div style="padding: 16px 20px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #e0e7e3; background-color: #ffffff; transition: all 0.2s;" :style="taskDueDateCheck(things.duedate,things.done) ? {'background-color' : '#fee2e2', 'border-color' : '#fca5a5'} : {'background-color' : '#f8f9fa', 'border-color' : '#f0fdf4'}">
+						<div style="display: flex; align-items: center; gap: 14px;" :style="taskComplete(things.done) && {'text-decoration' : 'line-through', 'opacity' : '0.5', 'color' : '#6b7280'}">
+							
+							<div style="flex: 1; min-width: 0;">
+								<span><input type="checkbox" x-model="things.done" style="width: 20px; height: 20px; accent-color: #57cc99; cursor: pointer; flex-shrink: 0;"></span>
+								<span style="font-weight: 500; font-size: 15px; word-break: break-word;" x-text="things.desc"></span>
+								<span style="display: block; font-size: 12px; color: #6b7280; margin-top: 4px;">Due Date: <span x-text="things.duedate"></span></span>
+							</div>
+						</div>
+					</div>
+				</template>
+				<div x-show="listOfThings.length === 0" style="text-align: center; padding: 40px 20px; color: #9ca3af; font-size: 14px;">
+					No tasks yet. Click "Add Item to List" to get started.
+				</div>
+			</div>
+
+		</div>
+	</body>
+	<script>
+		function todoApp(){
+			return{
+				addItem:false,
+				listData:{},
+				listOfThings:[],
+				addItemToList(){
+					this.listData.id = this.listOfThings.length + 1;
+					this.listData.done = false;
+					this.listOfThings.push(this.listData);
+					this.listData = {};
+					this.addItem = false;
+				},
+				showForm(){
+					this.addItem = true;
+				},
+				cancel(){
+					this.listData = {};
+					this.addItem = false;
+				},
+				taskDueDateCheck(duedate, status){
+					const currentDateUTC = new Date();
+					const formattedDateUTC = currentDateUTC.toISOString().split('T')[0];
+					console.log(status);
+					console.log(formattedDateUTC);
+					console.log(duedate);
+					if((formattedDateUTC >= duedate) && !status){
+						console.log("returns true");
+						return true;
+					} else {
+						console.log("returns false");
+						return false;
+					}
+
+				},
+				taskComplete(taskDone){
+					if(taskDone){
+						return true;
+					} else {
+						return false;
+					}
+				},
+				clearList(){
+					this.listOfThings = [];
+					this.listData = {};
+					this.addItem = false;
+				},
+			}
+		}
+	</script>
+</html>
